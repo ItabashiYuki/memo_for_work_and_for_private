@@ -1,0 +1,2 @@
+# memo_for_work_and_for_private
+日常生活で日々発生する情報を整理するためにサーバーレスAPIとSlack、LINEを連携させました。
