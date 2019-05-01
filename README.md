@@ -29,7 +29,7 @@
 <img width="258" alt="pictureh" src="https://user-images.githubusercontent.com/39019154/57003267-51d19400-6c00-11e9-9237-5c02db0a93f5.png">
 
 # 仕事用メモ
-日常生活で発生するメモを書き留めます。
+仕事で発生するメモを書き留めます。
 
 ## コマンド一覧
 - 通常メモ(コマンドなし)
