@@ -1,33 +1,33 @@
-var LINE_MEMO_ACCESS_TOKEN = "<このスクリプトと連携したLINE公式アカウントのトークン>";
+var LINE_MEMO_ACCESS_TOKEN = "<このスクリプトと連携したLINE公式アカウントのトークン>";            
 var USER_ID = "<myLINEアカウントのトークン>";
 
 function doPost(e) {
-  var accountAttribute = (e.parameter.text == undefined) ? "LINE" : "Slack";
+  const accountAttribute = (e.parameter.text == undefined) ? "LINE" : "Slack";
   
   if (accountAttribute == "LINE"){
-    var webhookData = JSON.parse(e.postData.contents).events[0];
+    const webhookData = JSON.parse(e.postData.contents).events[0];
     var token = webhookData.replyToken;
     var message = webhookData.message.text;
   }else {
     if (e.parameter.user_name != "slackbot"){
-      var token = e.parameter.token;
-      var message = e.parameter.text;
+      token = e.parameter.token;
+      message = e.parameter.text;
     }
   }
   return (message == undefined) ? false : sendResponse(accountAttribute,token,message);
 }
 
 function sendResponse(accountAttribute,token,message){
- var spreadSheetId = fetchTheSpreadSheet();
- var spreadSheet = SpreadsheetApp.openById(spreadSheetId);
- var sheets = spreadSheet.getSheets();
- var splitedMessage = message.split(" ");
+ const spreadSheetId = fetchTheSpreadSheet();
+ const spreadSheet = SpreadsheetApp.openById(spreadSheetId);
+ const sheets = spreadSheet.getSheets();
+ const splitedMessage = message.split(" ");
   
  switch (accountAttribute) {
    case "LINE":  var sheet;
-                 var statusForSelectingSheet = /^入金|出金$/;
+                 const statusForSelectingSheet = /^入金|出金$/;
                  (statusForSelectingSheet.test(splitedMessage[0])) ? sheet = sheets[2] : sheet = sheets[0];
-                 var parsedResult = parseMessage(sheet, splitedMessage);
+                 var parsedResult = parseStatus(sheet, splitedMessage);
                  var url = "https://api.line.me/v2/bot/message/reply";
                  var postData = {
                    "replyToken" : token,
@@ -38,17 +38,17 @@ function sendResponse(accountAttribute,token,message){
                    "Authorization" : "Bearer " + LINE_MEMO_ACCESS_TOKEN
                  };
                  break; 
-   case "Slack": var parsedResult = parseMessage(sheets[1], splitedMessage); 
-                 var url = "https://hooks.slack.com/services/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";
-                 var postData = {
+   case "Slack":  parsedResult = parseStatus(sheets[1], splitedMessage); 
+                  url = "https://hooks.slack.com/services/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";
+                  postData = {
                    "text" : parsedResult
                  };
-                 var headers = {
+                  headers = {
                    "Content-Type" : "application/json; charset=UTF-8"
                  };
                  break;         
  }
- var options = {
+ const options = {
                   "method":"POST",
                   "headers": headers,
                   "payload": JSON.stringify(postData)
@@ -56,14 +56,14 @@ function sendResponse(accountAttribute,token,message){
  return UrlFetchApp.fetch(url, options);  
 }
 
-//データベース代わりに活用しているスプレッドシートの情報を取ってくるメソッド
+//データベース代わりに活用しているスプレッドシートの情報を取ってくる関数
 function fetchTheSpreadSheet() {
-  var userProperties = PropertiesService.getUserProperties();
+  const userProperties = PropertiesService.getUserProperties();
   var spreadSheetId = userProperties.getProperty('SPREAD_SHEET_ID');
   
   if(!spreadSheetId) {
-    var newSpreadSheet = SpreadsheetApp.create('管理スプレッドシート');
-    var sheetsToBeMade = ["MEMOForPrivate","MEMOForWork","家計簿"];
+    const newSpreadSheet = SpreadsheetApp.create('管理スプレッドシート');
+    const sheetsToBeMade = ["MEMOForPrivate","MEMOForWork","家計簿"];
     sheetsToBeMade.forEach(function(value,index){
       newSpreadSheet.insertSheet(value,index);
     });
@@ -73,9 +73,9 @@ function fetchTheSpreadSheet() {
   return spreadSheetId;
 }
 
-function parseMessage(sheet, splitedMessage) {
-　　　　var statusForSearchingData =/^検索|all|1ヶ月|一ヶ月|半年|登録一覧|次回一覧|宿題一覧$/;
-  var statusForDepositsAndWithdrawals = /^入金|出金$/;
+function parseStatus(sheet, splitedMessage) {
+　　　　const statusForSearchingData =/^検索|all|1ヶ月|一ヶ月|半年|登録一覧|次回一覧|宿題一覧$/;
+  const statusForDepositsAndWithdrawals = /^入金|出金$/;
   if (statusForSearchingData.test(splitedMessage[0])) {
     return searchDataInTheSpreadSheet(splitedMessage[0], sheet, splitedMessage[1]);
   }else if(statusForDepositsAndWithdrawals.test(splitedMessage[0])) {
@@ -84,7 +84,7 @@ function parseMessage(sheet, splitedMessage) {
   return insertDataInTheSpreadSheet(splitedMessage[0], sheet, splitedMessage[1]); 
 }
 
-//MEMOForPrivateテーブルかMEMOForWorkテーブル内にデータを挿入するメソッド
+//MEMOForPrivateテーブルかMEMOForWorkテーブル内にデータを挿入する関数
 function insertDataInTheSpreadSheet(status, sheet, message) {
   switch (status) {
     case "次回":
@@ -96,24 +96,24 @@ function insertDataInTheSpreadSheet(status, sheet, message) {
   return "処理を受付けました。";
 }
 
-//家計簿テーブル内にデータを挿入するメソッド
+//家計簿テーブル内にデータを挿入する関数
 function insertDataInTheHouseholdAccountBook(status, sheet, message) {
   var today = new Date();
-  var gottenDate = today.getDate();
+  const gottenDate = today.getDate();
   
   (status == "残高") ? today.setDate(gottenDate+10) : today;
   sheet.appendRow([message, today, status]);
   return "処理を受付けました。";
 }
 
-//MEMOForPrivateテーブルとMEMOForWorkテーブル内のデータを検索するメソッド
+//MEMOForPrivateテーブルとMEMOForWorkテーブル内のデータを検索する関数
 function searchDataInTheSpreadSheet(status, sheet, message) {
-  var colValues1 = sheet.getRange(1,1,sheet.getLastRow(),1).getValues();
+  const colValues1 = sheet.getRange(1,1,sheet.getLastRow(),1).getValues();
   var colValues1Searched = [];
-  var allValuesOnSheet = sheet.getRange(1,1,sheet.getLastRow(),3).getValues();
+  const allValuesOnSheet = sheet.getRange(1,1,sheet.getLastRow(),3).getValues();
   var setDate = new Date();
-  var thisYear = setDate.getFullYear();
-  var thisMonth = (setDate.getMonth() + 1);
+  const thisYear = setDate.getFullYear();
+  const thisMonth = (setDate.getMonth() + 1);
   
   function fetchDataOfColValues1WhereColValues2Exist() {
       allValuesOnSheet.forEach(function(value) {
@@ -152,15 +152,15 @@ function searchDataInTheSpreadSheet(status, sheet, message) {
   }
 }
 
-//毎月一回入出金額と貯金残高をこのスクリプトと連携したLINE公式アカウントに通知してくれるメソッド
+//毎月一回入出金額と貯金残高をこのスクリプトと連携したLINE公式アカウントに通知してくれる関数
 function notifyHouseholdAccountBookOnceAMonth() {
-  var spreadSheetId = fetchTheSpreadSheet();
-  var spreadSheet = SpreadsheetApp.openById(spreadSheetId);
-  var sheets = spreadSheet.getSheets();
-  var allValuesOnSheet = sheets[2].getRange(1,1,sheets[2].getLastRow(),3).getValues();
+  const spreadSheetId = fetchTheSpreadSheet();
+  const spreadSheet = SpreadsheetApp.openById(spreadSheetId);
+  const sheets = spreadSheet.getSheets();
+  const allValuesOnSheet = sheets[2].getRange(1,1,sheets[2].getLastRow(),3).getValues();
   var setDate = new Date();
-  var thisYear = setDate.getFullYear();
-  var thisMonth = (setDate.getMonth() + 1);
+  const thisYear = setDate.getFullYear();
+  const thisMonth = (setDate.getMonth() + 1);
   (thisMonth-1 < 1) ? setDate.setMonth(11) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-2);
   
   function fetchDataOfColValues1WhereStatusIs(statusForSearching) {
@@ -173,18 +173,18 @@ function notifyHouseholdAccountBookOnceAMonth() {
   return colValues1Searched.length > 0 ? colValues1Searched.reduce(function(a, b) {return a + b;}) : "一致するものは見つかりませんでした。";
   }
   
-  var depositsInThisMonth = fetchDataOfColValues1WhereStatusIs("入金");
-  var withdrawalsInThisMonth = fetchDataOfColValues1WhereStatusIs("出金");
-  var balance = fetchDataOfColValues1WhereStatusIs("残高") + depositsInThisMonth - withdrawalsInThisMonth;
-  insertDataInTheHouseholdAccountBook("残高", sheets[2], balance)
+  const depositsInThisMonth = fetchDataOfColValues1WhereStatusIs("入金");
+  const withdrawalsInThisMonth = fetchDataOfColValues1WhereStatusIs("出金");
+  const balance = fetchDataOfColValues1WhereStatusIs("残高") + depositsInThisMonth - withdrawalsInThisMonth;
+  insertDataInTheHouseholdAccountBook("残高", sheets[2], balance);
   
   pushMessage("今月の入金額: " + depositsInThisMonth + "円\n" + "今月の出金額: " + withdrawalsInThisMonth + "円\n" + "残高: " + balance + "円"); 
 }
 
-//このスクリプトと連携したLINE公式アカウントにメッセージを送るためのメソッド
+//このスクリプトと連携したLINE公式アカウントにメッセージを送るための関数
 function pushMessage(test) {
-    //deleteTrigger();
-  var postData = {
+    //devareTrigger();
+  const postData = {
     "to": USER_ID,
     "messages": [{
       "type": "text",
@@ -192,16 +192,16 @@ function pushMessage(test) {
     }]
   };
 
-  var url = "https://api.line.me/v2/bot/message/push";
-  var headers = {
+  const url = "https://api.line.me/v2/bot/message/push";
+  const headers = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ' + LINE_MEMO_ACCESS_TOKEN,
   };
 
-  var options = {
+  const options = {
     "method": "post",
     "headers": headers,
     "payload": JSON.stringify(postData)
   };
-  var response = UrlFetchApp.fetch(url, options);
+  const response = UrlFetchApp.fetch(url, options);
 }
