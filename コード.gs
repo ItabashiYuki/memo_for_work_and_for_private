@@ -108,47 +108,47 @@ function insertDataInTheHouseholdAccountBook(status, sheet, message) {
 
 //MEMOForPrivateテーブルとMEMOForWorkテーブル内のデータを検索する関数
 function searchDataInTheSpreadSheet(status, sheet, message) {
-  const colValues1 = sheet.getRange(1,1,sheet.getLastRow(),1).getValues();
-  var colValues1Searched = [];
+  const valuesOfColumn1 = sheet.getRange(1,1,sheet.getLastRow(),1).getValues();
+  var valuesOfColumn1Searched = [];
   const allValuesOnSheet = sheet.getRange(1,1,sheet.getLastRow(),3).getValues();
   var setDate = new Date();
   const thisYear = setDate.getFullYear();
   const thisMonth = (setDate.getMonth() + 1);
   
-  function fetchDataOfColValues1WhereColValues2Exist() {
+  function fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist() {
       allValuesOnSheet.forEach(function(value) {
         if (value[1].getTime() >= setDate.getTime()){
-          colValues1Searched.push(value[0]);
+          valuesOfColumn1Searched.push(value[0]);
         }
      });
-  return colValues1Searched.length > 0 ? colValues1Searched.join("\n") : "一致するものは見つかりませんでした。";
+  return valuesOfColumn1Searched.length > 0 ? valuesOfColumn1Searched.join("\n") : "一致するものは見つかりませんでした。";
   }
   
   switch (status) { 
     case "検索": allValuesOnSheet.forEach(function(value) {
                   if (value[0].indexOf(message) >= 0){
-                    colValues1Searched.push(value[0]);
+                    valuesOfColumn1Searched.push(value[0]);
                   }
                 });
-                return colValues1Searched.length > 0 ? colValues1Searched.join("\n") : "一致するものは見つかりませんでした。";
+                return valuesOfColumn1Searched.length > 0 ? valuesOfColumn1Searched.join("\n") : "一致するものは見つかりませんでした。";
                 break;
-    case "all": return colValues1.join("\n");
+    case "all": return valuesOfColumn1.join("\n");
                 break;
     case "1ヶ月":
     case "一ヶ月": (thisMonth-1 < 1) ? setDate.setMonth(11) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-2);
-                  return fetchDataOfColValues1WhereColValues2Exist();
+                  return fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist();
                   break;
     case "半年": (thisMonth-6 < 6) ? setDate.setMonth(12+(thisMonth-7)) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-7);
-                 return fetchDataOfColValues1WhereColValues2Exist();
+                 return fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist();
                  break;
     case "登録一覧":
     case "次回一覧":
     case "宿題一覧": allValuesOnSheet.forEach(function(value) {
                     if (value[2].length > 0 && value[2] == status.replace("一覧","") ){
-                        colValues1Searched.push(value[0]);
+                        valuesOfColumn1Searched.push(value[0]);
                     }
                     });      　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
-                    return colValues1Searched.length > 0 ? colValues1Searched.join("\n") : "一致するものは見つかりませんでした。";  
+                    return valuesOfColumn1Searched.length > 0 ? valuesOfColumn1Searched.join("\n") : "一致するものは見つかりませんでした。";  
   }
 }
 
@@ -163,19 +163,19 @@ function notifyHouseholdAccountBookOnceAMonth() {
   const thisMonth = (setDate.getMonth() + 1);
   (thisMonth-1 < 1) ? setDate.setMonth(11) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-2);
   
-  function fetchDataOfColValues1WhereStatusIs(statusForSearching) {
-    var colValues1Searched = [];
+  function fetchDataOfValuesOfColumn1WhereStatusIs(statusForSearching) {
+    var valuesOfColumn1Searched = [];
       allValuesOnSheet.forEach(function(value) {
         if (value[1].getTime() >= setDate.getTime() && value[2].indexOf(statusForSearching) >= 0) {
-          colValues1Searched.push(value[0]);
+          valuesOfColumn1Searched.push(value[0]);
         }
       });
-  return colValues1Searched.length > 0 ? colValues1Searched.reduce(function(a, b) {return a + b;}) : "一致するものは見つかりませんでした。";
+  return valuesOfColumn1Searched.length > 0 ? valuesOfColumn1Searched.reduce(function(a, b) {return a + b;}) : "一致するものは見つかりませんでした。";
   }
   
-  const depositsInThisMonth = fetchDataOfColValues1WhereStatusIs("入金");
-  const withdrawalsInThisMonth = fetchDataOfColValues1WhereStatusIs("出金");
-  const balance = fetchDataOfColValues1WhereStatusIs("残高") + depositsInThisMonth - withdrawalsInThisMonth;
+  const depositsInThisMonth = fetchDataOfValuesOfColumn1WhereStatusIs("入金");
+  const withdrawalsInThisMonth = fetchDataOfValuesOfColumn1WhereStatusIs("出金");
+  const balance = fetchDataOfValuesOfColumn1WhereStatusIs("残高") + depositsInThisMonth - withdrawalsInThisMonth;
   insertDataInTheHouseholdAccountBook("残高", sheets[2], balance);
   
   pushMessage("今月の入金額: " + depositsInThisMonth + "円\n" + "今月の出金額: " + withdrawalsInThisMonth + "円\n" + "残高: " + balance + "円"); 
