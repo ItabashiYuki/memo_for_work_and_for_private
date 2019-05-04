@@ -115,7 +115,7 @@ function searchDataInTheSpreadSheet(status, sheet, message) {
   const thisYear = setDate.getFullYear();
   const thisMonth = (setDate.getMonth() + 1);
   
-  function fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist() {
+  function fetchDataOfValuesOfColumn1WhereValuesOfColumn2Exist() {
       allValuesOnSheet.forEach(function(value) {
         if (value[1].getTime() >= setDate.getTime()){
           valuesOfColumn1Searched.push(value[0]);
@@ -136,10 +136,10 @@ function searchDataInTheSpreadSheet(status, sheet, message) {
                 break;
     case "1ヶ月":
     case "一ヶ月": (thisMonth-1 < 1) ? setDate.setMonth(11) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-2);
-                  return fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist();
+                  return fetchDataOfValuesOfColumn1WhereValuesOfColumn2Exist();
                   break;
     case "半年": (thisMonth-6 < 6) ? setDate.setMonth(12+(thisMonth-7)) && setDate.setFullYear(thisYear-1) : setDate.setMonth(thisMonth-7);
-                 return fetchDataOfValuesOfColumn1WherevaluesOfColumn2Exist();
+                 return fetchDataOfValuesOfColumn1WhereValuesOfColumn2Exist();
                  break;
     case "登録一覧":
     case "次回一覧":
